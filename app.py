@@ -1,8 +1,12 @@
-import streamlit as st
+import os
+
+from dotenv import load_dotenv
 from ollama import Client
+import streamlit as st
 from streamlit_pills import pills
 import requests
 
+load_dotenv()
 
 def update_stats():
     with stats_box.container():
@@ -67,7 +71,7 @@ with st.sidebar:
     st.text_input(
         "IP address of Ollama server:",
         key="server",
-        value=st.query_params.get("server", ""),
+        value=os.getenv("OLLAMA_SERVER", ""),
     )
     stats_box = st.empty()
     system_box = st.empty()
