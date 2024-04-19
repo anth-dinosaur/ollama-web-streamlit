@@ -8,6 +8,7 @@ import requests
 
 load_dotenv()
 
+
 def update_stats():
     with stats_box.container():
         st.header("Generation statistics")
@@ -21,6 +22,7 @@ def update_stats():
         else:
             st.write("No generations performed yet")
     update_glances_metrics()
+
 
 def get_glances_api_data(endpoint):
     try:
@@ -36,17 +38,17 @@ def get_glances_api_data(endpoint):
 
 def update_glances_metrics():
     cpu_data = get_glances_api_data("cpu/total")
-    cpu_percent = round(cpu_data.get("total", 0),1) if cpu_data else 0
+    cpu_percent = round(cpu_data.get("total", 0), 1) if cpu_data else 0
 
     mem_data = get_glances_api_data("mem/percent")
-    mem_percent = round(mem_data.get("percent", 0),0) if mem_data else 0
+    mem_percent = round(mem_data.get("percent", 0), 0) if mem_data else 0
 
     gpu_data = get_glances_api_data("gpu/gpu_id/0")
     if gpu_data and "0" in gpu_data:
         gpu_info = gpu_data["0"][0]
-        gpu_percent = round(gpu_info.get("proc", 0),1)
-        gpu_temp = round(gpu_info.get("temperature", 0),0)
-        gpu_mem_percent = round(gpu_info.get("mem", 0),0)
+        gpu_percent = round(gpu_info.get("proc", 0), 1)
+        gpu_temp = round(gpu_info.get("temperature", 0), 0)
+        gpu_mem_percent = round(gpu_info.get("mem", 0), 0)
     else:
         gpu_percent = gpu_temp = gpu_mem_percent = 0
 
@@ -62,6 +64,7 @@ def update_glances_metrics():
                 f"GPU Temp: {gpu_temp}°C",
             ],
             index=None,
+            key="system_stats_pills",
         )
 
 
@@ -84,7 +87,13 @@ if "server" in st.session_state and st.session_state.server.strip() != "":
 
         # Create a dropdown for model selection
         models = [model["name"] for model in ollama.list()["models"]]
-        selected_model = pills(label="Select a model:", options=models, key="pills")
+        default_model = os.getenv("OLLAMA_MODEL", "")
+        selected_model = pills(
+            label="Select a model:",
+            options=models,
+            index=models.index(default_model) if default_model in models else 0,
+            key="pills",
+        )
     except Exception as e:
         st.error(f"Failed to initialize Ollama: {e}")
 
